@@ -19,7 +19,7 @@ var shader_is_dirty: bool = true
 const template_shader: String = """
 #version 450
 
-// Invocations in the (x,y,z) dimention
+// Invocations in the (x, y, z) dimension
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba16f, set = 0, binding = 0) uniform image2D color_image;
@@ -28,21 +28,21 @@ layout(rgba16f, set = 0, binding = 0) uniform image2D color_image;
 layout(push_constant, std430) uniform Params {
 	vec2 raster_size;
 	vec2 reserved;
-} params
+} params;
 
 // The code we want to execute in each invocation
 void main() {
 	ivec2 uv = ivec2(gl_GlobalInvocationID.xy);
 	ivec2 size = ivec2(params.raster_size);
-	
-	if(uv.x >= size.x || uv.y >= size.y){
+
+	if (uv.x >= size.x || uv.y >= size.y) {
 		return;
 	}
-	
+
 	vec4 color = imageLoad(color_image, uv);
-	
+
 	#COMPUTE_CODE
-	
+
 	imageStore(color_image, uv, color);
 }
 """
@@ -86,7 +86,7 @@ func _check_shader() -> bool:
 	if shader_spirv.compile_error_compute != "":
 		push_error(shader_spirv.compile_error_compute)
 		push_error("In: " + new_shader_code)
-		return false
+		return false 
 		
 	shader = rd.shader_create_from_spirv(shader_spirv)
 	if not shader.is_valid():
