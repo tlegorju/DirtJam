@@ -1,0 +1,17 @@
+[gd_resource type="Compositor" load_steps=3 format=3 uid="uid://dkjm3rrp03dvv"]
+
+[ext_resource type="Script" path="res://Scripts/post_process_shader.gd" id="1_4aof3"]
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_ywb66"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("1_4aof3")
+shader_code = "float gray = color.r * 0.2125 + color.g * 0.7154 + color.b * 0.0721;
+color.rgb = vec3(gray);"
+
+[resource]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_ywb66")])

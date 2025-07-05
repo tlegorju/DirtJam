@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpdvkvp64jr2d"]
+
+[ext_resource type="Compositor" uid="uid://dkjm3rrp03dvv" path="res://Compositors/comp_terrain.tres" id="1_rj3fk"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.914826, -0.307893, 0.261334, 0, 0.647109, 0.762397, -0.403849, -0.697461, 0.591992, 0, 5.91257, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.57243)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+compositor = ExtResource("1_rj3fk")
