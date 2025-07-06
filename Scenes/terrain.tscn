@@ -13,14 +13,14 @@ material = SubResource("StandardMaterial3D_qiwo6")
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.914826, -0.307893, 0.261334, 0, 0.647109, 0.762397, -0.403849, -0.697461, 0.591992, 0, 5.91257, 0)
+transform = Transform3D(0.9109, 0.314586, -0.267015, 1.59633e-09, 0.647109, 0.762397, 0.412627, -0.694468, 0.589452, 0, 122.266, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_38ihm")
 compositor = ExtResource("1_rj3fk")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.57243)
+transform = Transform3D(0.697678, -0.244534, 0.673386, 0, 0.939943, 0.341331, -0.716412, -0.238139, 0.655778, 83.0656, 41.4413, 91.3913)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_wuvof")
