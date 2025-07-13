@@ -32,6 +32,7 @@ class_name DrawTerrainMesh extends CompositorEffect
 ## How many layers of noise to sum. More octaves give more detail with diminishing returns.
 @export_range(1, 32) var octave_count : int = 10
 
+
 @export_subgroup("Octave Settings")
 ## Amount of rotation (in degrees) to apply each octave iteration
 @export_range(-180.0, 180.0) var rotation : float = 30.0
@@ -53,6 +54,9 @@ class_name DrawTerrainMesh extends CompositorEffect
 
 ## Multiplies with final noise result to adjust terrain height
 @export_range(0.0, 300.0, 0.1, "or_greater") var height_scale : float = 50.0
+
+## dist of each slice diminishing the lod
+@export var dist_slice_lod : float = 100.0
 
 @export_group("Material Settings")
 
@@ -364,6 +368,10 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(max_dist_fog)
 	buffer.push_back(exp_fog_density)
 	buffer.push_back(exp_squared_fog_enabled)
+	buffer.push_back(dist_slice_lod)
+	buffer.push_back(1.0)
+	buffer.push_back(1.0)
+	buffer.push_back(1.0)
 	
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
@@ -460,7 +468,7 @@ const source_vertex = "
 			vec3 noise_pos = (pos + vec3(_Offset.x, 0, _Offset.z)) / _Scale;
 
 			// The fractional brownian motion
-			vec3 n = fbm(noise_pos.xz);
+			vec3 n = fbm(noise_pos.xz, distance(pos,_CameraPos)); //int(distance(pos,_CameraPos)/_DistSliceLod));
 
 			// Adjust height of the vertex by fbm result scaled by final desired amplitude
 			pos.y += _TerrainHeight * n.x + _TerrainHeight - _Offset.y;
@@ -524,7 +532,7 @@ const source_fragment = "
 			vec3 noise_pos = (pos + vec3(_Offset.x, 0, _Offset.z)) / _Scale;
 
 			// Calculate fbm, we don't care about the height just the derivatives here for the normal vector so the ` + _TerrainHeight - _Offset.y` drops off as it isn't relevant to the derivative
-			vec3 n = _TerrainHeight * fbm(noise_pos.xz);
+			vec3 n = _TerrainHeight * fbm(noise_pos.xz, distance(pos,_CameraPos));//int(distance(pos,_CameraPos)/_DistSliceLod));
 
 			// To more easily customize the color slope blending this is a separate normal vector with its horizontal gradients significantly reduced so the normal points upwards more
 			vec3 slope_normal = normalize(vec3(-n.y, 1, -n.z) * vec3(_SlopeDamping, 1, _SlopeDamping));
@@ -602,12 +610,13 @@ const uniform_buffer_code = "
 			float _MaxDistFog;
 			float _ExpFogDensity;
 			bool _ExpSquaredFogEnabled;
+			float _DistSliceLod;
 		};		
 		"
 
 # common shader code
 const common_shader_code = "
-	#define PI 3.141592653589793238462
+		#define PI 3.141592653589793238462
 		
 		// UE4's PseudoRandom function
 		// https://github.com/EpicGames/UnrealEngine/blob/release/Engine/Shaders/Private/Random.ush
@@ -683,7 +692,7 @@ const common_shader_code = "
 		}
 
 		// The fractional brownian motion that sums many noise values as explained in the video accompanying this project
-		vec3 fbm(vec2 pos) {
+		vec3 fbm(vec2 pos, float distToCam) {
 			float lacunarity = _Lacunarity;
 			float amplitude = _InitialAmplitude;
 
@@ -707,7 +716,12 @@ const common_shader_code = "
 				
 			mat2 m2i = inverse(m2);
 
-			for(int i = 0; i < int(_Octaves); ++i) {
+			float division = floor(distToCam / _DistSliceLod);
+			int octaves= int( _Octaves / division);
+			
+			octaves = clamp(octaves, 1, int(_Octaves));
+
+			for(int i = 0; i < octaves; ++i) {
 				vec3 n = perlin_noise2D(pos);
 				
 				// add height scaled by current amplitude
