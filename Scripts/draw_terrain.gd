@@ -84,6 +84,8 @@ class_name DrawTerrainMesh extends CompositorEffect
 
 ## Additive light adjustment
 @export var ambient_light : Color = Color.DIM_GRAY
+@export var specular_power = 2.0
+@export var specular_intensity = 5.0
 
 
 var transform : Transform3D
@@ -369,8 +371,8 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(exp_fog_density)
 	buffer.push_back(exp_squared_fog_enabled)
 	buffer.push_back(dist_slice_lod)
-	buffer.push_back(1.0)
-	buffer.push_back(1.0)
+	buffer.push_back(specular_power)
+	buffer.push_back(specular_intensity)
 	buffer.push_back(1.0)
 	
 
@@ -548,13 +550,26 @@ const source_fragment = "
 
 			// Lambertian diffuse, negative dot product values clamped off because negative light doesn't exist
 			float ndotl = clamp(dot(_LightDirection, normal), 0, 1);
+			
+			// Calculate Specular Factor
+			vec4 specularColor = vec4(0.0,0.0,0.0,0.0);
+			
+			vec3 vertexToEye = normalize(_CameraPos - pos);
+			vec3 lightReflect = normalize(reflect(_LightDirection, normal));
+			float specularFactor = dot(vertexToEye, lightReflect);
+			
+			if(specularFactor > 0){
+				specularFactor = pow(specularFactor, _SpecularPower);
+				specularColor = vec4(albedo.rgb * _SpecularIntensity * specularFactor, 1.0);
+			}
 
 			// Direct light cares about the diffuse result, ambient light does not
 			vec4 direct_light = albedo * ndotl;
 			vec4 ambient_light = albedo * _AmbientLight;
+			vec4 specular_light = specularFactor * specularColor;
 
 			// Combine lighting values, clip to prevent pixel values greater than 1 which would really really mess up the gamma correction below
-			vec4 lit = clamp(direct_light + ambient_light, vec4(0), vec4(1));
+			vec4 lit = clamp(direct_light + ambient_light + specular_light, vec4(0), vec4(1));
 
 			lit = mix(_FogColor, lit, ComputeFogFactor());
 
@@ -611,6 +626,8 @@ const uniform_buffer_code = "
 			float _ExpFogDensity;
 			bool _ExpSquaredFogEnabled;
 			float _DistSliceLod;
+			float _SpecularPower;
+			float _SpecularIntensity;
 		};		
 		"
 
@@ -717,7 +734,7 @@ const common_shader_code = "
 			mat2 m2i = inverse(m2);
 
 			float division = floor(distToCam / _DistSliceLod);
-			int octaves= int( _Octaves / division);
+			int octaves= int( _Octaves - division);
 			
 			octaves = clamp(octaves, 1, int(_Octaves));
 
