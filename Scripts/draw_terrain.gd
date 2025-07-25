@@ -529,6 +529,28 @@ const source_fragment = "
 			return FogFactor;
 		}
 		
+		float ComputeAnalyticalShadow(){
+			// result
+			float R = 0;
+			float dist = 5;
+			
+			// https://youtu.be/BFld4EBO2RE?si=p-ZiK2Uu8qJ_nzLV&t=538
+			// https://www.shadertoy.com/view/4ttSWf
+
+			// signed distance of any point in the terrain f
+			// to a point in the line, T units away from P (pos)
+			// all divided by t
+			for(int i = 0; i<32; i++)
+			{
+				// not working yet
+				R = (length(pos + _LightDirection * dist )) / dist;
+				
+			}
+			
+			// the minimum of R, smoothsteped to the 0-1 range, will be a good estimation
+			return smoothstep(0,1,R);
+		}
+		
 		void main() {
 			// Recalculate initial noise sampling position same as vertex shader
 			vec3 noise_pos = (pos + vec3(_Offset.x, 0, _Offset.z)) / _Scale;
@@ -569,7 +591,9 @@ const source_fragment = "
 			vec4 specular_light = specularFactor * specularColor;
 
 			// Combine lighting values, clip to prevent pixel values greater than 1 which would really really mess up the gamma correction below
-			vec4 lit = clamp(direct_light + ambient_light + specular_light, vec4(0), vec4(1));
+
+			vec4 lit = direct_light + ambient_light + specular_light * ComputeAnalyticalShadow();
+			lit = clamp(lit, vec4(0), vec4(1));
 
 			lit = mix(_FogColor, lit, ComputeFogFactor());
 
