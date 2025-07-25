@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://dpdvkvp64jr2d"]
+[gd_scene load_steps=6 format=3 uid="uid://dpdvkvp64jr2d"]
 
 [ext_resource type="Compositor" uid="uid://dkjm3rrp03dvv" path="res://Compositors/comp_terrain.tres" id="1_rj3fk"]
+[ext_resource type="Script" uid="uid://bmopgvwbq20vx" path="res://Scripts/camera_controller.gd" id="2_62tj5"]
 
 [sub_resource type="Environment" id="Environment_38ihm"]
 
@@ -21,6 +22,7 @@ compositor = ExtResource("1_rj3fk")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24.8188, 70.0006)
+script = ExtResource("2_62tj5")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_wuvof")

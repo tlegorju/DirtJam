@@ -1,0 +1,44 @@
+Dirt Jam:
+
+INTERMEDIATE
+
+Analytical Shadows (Visual)
+	The terrain has no sense of scale because there's no shadows communicating the larger shapes. We have an analytical height function, how could you determine if the terrain is blocking the view to the sun?
+Cloud Shadows (Visual)
+	A very underrated technique that you don't actually need real clouds for, famously demonstrated by Genshin Impact. How could you utilize noise to give the impression of clouds slowly drifting over the terrain?
+Improved Random (Visual?)
+	You'll notice that some seeds give some very strange noise patterns. This isn't a fault of perlin noise, but of the pseudo random function I'm using which is from UE4. It isn't very good! Can you find a better hash function?
+Physics Mesh (Gameplay)
+	Oh no! The terrain doesn't actually exist! How could you create a much simpler mesh that approximates the terrain for physics calculations?
+Material Improvement (Visual)
+	Right now the terrain kind of just looks like rock. This is obviously not ideal for all terrain types, how could you upgrade the lighting model to support something that looks more like snow or sand or mud?
+Texturing (Visual)
+	Flat colors are boring! How could you add UV coordinates to the mesh data and start sampling textures to make the surface more interesting?
+Precalculating Height (Optimization)
+	It turns out perlin noise is really expensive to calculate at this scale! How could you precalculate the noise into textures for the mesh to make use of?
+Parallax Mapping (Visual)
+	If you've played Final Fantasy 14 you may have noticed the terrain surface looks really weird! That's cause it's poorly parallax mapped to try and give some sense of depth to the flat surface. Thankfully, we have an analytical height function! How could you use that to parallax map the terrain surface?
+Automated Shader Recompilation (Tooling)
+	Uh oh! It turns out this project has the same issue as the project I went over in my video 'How Engines Make Shaders Easy'. Can you apply the same techniques to automatically recompile the terrain shader when you make changes?
+
+==========================================
+
+DONE:
+
+BEGINNER
+			+ Add control for camera
+
+			Distance Fog (Visual)
+			How could you give the shader access to the camera position and fade out distant pixels?
+			=> CHECK IF THE METHOD IS GOOD
+			=> tweak the visual
+	
+			Shader Include Files (Tooling)
+				Annoyingly, the vertex and fragment shaders contain a lot of duplicate code! How could you use GDScript to automatically inject the shared code into each shader so you don't have to make double the changes?
+				=> Check other compute shader
+			Level Of Detail (Optimization)
+				To get a highly detailed terrain surface, we must calculate many layers of noise, but at a certain distance, more noise layers don't result in any visual difference! Could you use the distance from the camera to control how detailed the pixel needs to be?
+			=> Could make it linear like the fog but hey, it kinda works ?
+
+			Improved Lighting (Visual)
+				I've explained several simple lighting models in my past videos. The shader is currently only doing a lambertian diffuse, could you add a specular highlight?
