@@ -2,8 +2,9 @@ Dirt Jam:
 
 INTERMEDIATE
 
-Analytical Shadows (Visual)
-	The terrain has no sense of scale because there's no shadows communicating the larger shapes. We have an analytical height function, how could you determine if the terrain is blocking the view to the sun?
+	// To test but seems to be working ?
+	Analytical Shadows (Visual)
+		The terrain has no sense of scale because there's no shadows communicating the larger shapes. We have an analytical height function, how could you determine if the terrain is blocking the view to the sun?
 Cloud Shadows (Visual)
 	A very underrated technique that you don't actually need real clouds for, famously demonstrated by Genshin Impact. How could you utilize noise to give the impression of clouds slowly drifting over the terrain?
 Improved Random (Visual?)

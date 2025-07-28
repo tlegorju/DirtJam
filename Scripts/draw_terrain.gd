@@ -470,7 +470,7 @@ const source_vertex = "
 			vec3 noise_pos = (pos + vec3(_Offset.x, 0, _Offset.z)) / _Scale;
 
 			// The fractional brownian motion
-			vec3 n = fbm(noise_pos.xz, distance(pos,_CameraPos)); //int(distance(pos,_CameraPos)/_DistSliceLod));
+			vec3 n = fbm(noise_pos.xz, distance(pos,_CameraPos)); 
 
 			// Adjust height of the vertex by fbm result scaled by final desired amplitude
 			pos.y += _TerrainHeight * n.x + _TerrainHeight - _Offset.y;
@@ -529,10 +529,10 @@ const source_fragment = "
 			return FogFactor;
 		}
 		
-		float ComputeAnalyticalShadow(){
+		float ComputeAnalyticalShadow(vec3 startPos, vec3 lightDir, float step){
 			// result
-			float R = 0;
-			float dist = 5;
+			float result = 0;
+			float dist = step;
 			
 			// https://youtu.be/BFld4EBO2RE?si=p-ZiK2Uu8qJ_nzLV&t=538
 			// https://www.shadertoy.com/view/4ttSWf
@@ -542,13 +542,21 @@ const source_fragment = "
 			// all divided by t
 			for(int i = 0; i<32; i++)
 			{
-				// not working yet
-				R = (length(pos + _LightDirection * dist )) / dist;
+				vec3 curPos = startPos + lightDir * dist;
+				vec3 noise_pos = (curPos + vec3(_Offset.x, 0, _Offset.z)) / _Scale;
+							
+				vec3 n = fbm(noise_pos.xz, distance(curPos,_CameraPos));
+				
+				float terrainHeight = _TerrainHeight * n.x + _TerrainHeight - _Offset.y;
+				float height = pos.y - terrainHeight;
+				
+				result = min(result, 32 * height/dist);
+				if(result<0.0001 || pos.y>840.0)break;
+				
+				dist += clamp(height, 2.0+dist*0.1, 100.0);
 				
 			}
-			
-			// the minimum of R, smoothsteped to the 0-1 range, will be a good estimation
-			return smoothstep(0,1,R);
+			return smoothstep(0,1,result);				
 		}
 		
 		void main() {
@@ -556,7 +564,7 @@ const source_fragment = "
 			vec3 noise_pos = (pos + vec3(_Offset.x, 0, _Offset.z)) / _Scale;
 
 			// Calculate fbm, we don't care about the height just the derivatives here for the normal vector so the ` + _TerrainHeight - _Offset.y` drops off as it isn't relevant to the derivative
-			vec3 n = _TerrainHeight * fbm(noise_pos.xz, distance(pos,_CameraPos));//int(distance(pos,_CameraPos)/_DistSliceLod));
+			vec3 n = _TerrainHeight * fbm(noise_pos.xz, distance(pos,_CameraPos));
 
 			// To more easily customize the color slope blending this is a separate normal vector with its horizontal gradients significantly reduced so the normal points upwards more
 			vec3 slope_normal = normalize(vec3(-n.y, 1, -n.z) * vec3(_SlopeDamping, 1, _SlopeDamping));
@@ -592,7 +600,7 @@ const source_fragment = "
 
 			// Combine lighting values, clip to prevent pixel values greater than 1 which would really really mess up the gamma correction below
 
-			vec4 lit = direct_light + ambient_light + specular_light * ComputeAnalyticalShadow();
+			vec4 lit = direct_light + ambient_light + specular_light * ComputeAnalyticalShadow(pos, _LightDirection, 0.02);
 			lit = clamp(lit, vec4(0), vec4(1));
 
 			lit = mix(_FogColor, lit, ComputeFogFactor());
@@ -688,7 +696,7 @@ const common_shader_code = "
 		vec2 quinticDerivative(vec2 t) {
 			return vec2(30) * t * t * (t * (t - vec2(2)) + vec2(1));
 		}
-
+		
 		// it's perlin noise that returns the noise in the x component and the derivatives in the yz components as explained in my perlin noise video
 		vec3 perlin_noise2D(vec2 pos) {
 			vec2 latticeMin = floor(pos);
