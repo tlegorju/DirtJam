@@ -22,6 +22,18 @@ Parallax Mapping (Visual)
 Automated Shader Recompilation (Tooling)
 	Uh oh! It turns out this project has the same issue as the project I went over in my video 'How Engines Make Shaders Easy'. Can you apply the same techniques to automatically recompile the terrain shader when you make changes?
 
+ADVANCED
+Shadow Mapping (Visual/Optimization)
+	Shadows are very expensive to compute! How could you render the scene from the light source to create a shadow map for the terrain?
+Tessellation (Optimization)
+	The terrain mesh is very very expensive, how could you subdivide the triangles at runtime to reduce the geometric complexity?
+Erosion (Visual)
+	Perlin noise is kind of lame by itself! Environments in the real world are the result of hundreds of thousands of years of slight erosion whether from wind, water, heat, or anything else. Explore different literature on the subject to create a more realistic landscape!
+Signal Processing (Visual)
+	Perlin noise is a signal which can be processed like any other, what signal processing techniques could you apply to make the terrain generator more interesting? Perhaps a band pass filter!
+Foliage (Visual)
+	hahahahahahahahahahahahaha
+
 ==========================================
 
 DONE:
